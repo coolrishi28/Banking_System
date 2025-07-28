@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-typedef struct {
+typedef struct
+{
 	char name[100];
 	float balance;
 	char password[100];
@@ -26,12 +27,14 @@ void clearScreen();
 void showLoading(int dots, int delaySeconds);
 void mainPage();
 
-int main() {
+int main()
+{
 	mainPage();
 	return 0;
 }
 
-void mainPage() {
+void mainPage()
+{
 	int choice;
 	char exitChoice;
 
@@ -44,35 +47,48 @@ void mainPage() {
 		scanf("%d", &choice);
 		getchar();
 
-		switch (choice) {
+		switch (choice)
+		{
 		case 1:
 			createAccount();
 			break;
 		case 2:
 		case 3:
-		case 4: {
+		case 4:
+			{
 			char username[100];
 			printf("\t\t\t\tEnter account name: ");
 			fgets(username, sizeof(username), stdin);
 			username[strcspn(username, "\n")] = '\0';
 
-			if (!fileExists(username)) {
+			if (!fileExists(username))
+			{
 				printf("\t\t\t\tAccount does not exist.\n");
 				//getchar();
 				showLoading(3, 1);
 				break;
 			}
 
-			if (!authenticateUser(username)) {
+			if (!authenticateUser(username))
+			{
 				printf("\t\t\t\tAuthentication failed.\n");
 				//getchar();
 				showLoading(3, 1);
 				break;
 			}
 
-			if (choice == 2) deposit(username);
-			else if (choice == 3) withdraw(username);
-			else displayDetails(username);
+			if (choice == 2)
+			{
+				deposit(username);
+			}
+			else if (choice == 3)
+			{
+				withdraw(username);
+			}
+			else
+			{
+				displayDetails(username);
+			}
 			showLoading(3, 1);
 			break;
 		}
@@ -91,12 +107,14 @@ void mainPage() {
 	} while (exitChoice == 'n' || exitChoice == 'N');
 }
 
-void creatorTag() {
+void creatorTag()
+{
 	printf("\t\t\t\tBanking System\n");
 	printf("\t\t\t\tBy: Shashwat Dwivedi\n\n");
 }
 
-void optionPanel() {
+void optionPanel()
+{
 	printf("\t\t\t\t1. Create New Account\n");
 	printf("\t\t\t\t2. Deposit\n");
 	printf("\t\t\t\t3. Withdraw\n");
@@ -104,11 +122,13 @@ void optionPanel() {
 	printf("\t\t\t\t5. Exit\n");
 }
 
-void showLoading(int dots, int delaySeconds) {
+void showLoading(int dots, int delaySeconds)
+{
 	printf("\t\t\t\tLoading");
 	fflush(stdout);
 
-	for (int i = 0; i < dots; i++) {
+	for (int i = 0; i < dots; i++)
+	{
 		sleep(delaySeconds);
 		printf(".");
 		fflush(stdout);
@@ -116,11 +136,13 @@ void showLoading(int dots, int delaySeconds) {
 	printf("\n");
 }
 
-int fileExists(const char *username) {
+int fileExists(const char *username)
+{
 	char filename[120];
 	snprintf(filename, sizeof(filename), "%s.dat", username);
 	FILE *file = fopen(filename, "rb");
-	if (file) {
+	if (file)
+	{
 		fclose(file);
 		return 1;
 	}
