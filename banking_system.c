@@ -148,3 +148,112 @@ int fileExists(const char *username)
 	}
 	return 0;
 }
+
+int authenticateUser(const char *username) {
+	char filename[120], enteredPassword[100];
+	snprintf(filename, sizeof(filename), "%s.dat", username);
+	FILE *file = fopen(filename, "rb");
+	if (!file) return 0;
+
+	User user;
+	fread(&user, sizeof(User), 1, file);
+	fclose(file);
+
+	printf("\t\t\t\tEnter password: ");
+	fgets(enteredPassword, sizeof(enteredPassword), stdin);
+	enteredPassword[strcspn(enteredPassword, "\n")] = '\0';
+
+	return strcmp(user.password, enteredPassword) == 0;
+}
+
+void createAccount() {
+	char username[100], password[100];
+	User newUser;
+	float initialBalance = 0.0;
+
+	printf("\t\t\t\tEnter new account name: ");
+	fgets(username, sizeof(username), stdin);
+	username[strcspn(username, "\n")] = '\0';
+
+	if (fileExists(username)) {
+		printf("\t\t\t\tAccount already exists.\n");
+		//getchar();
+		showLoading(3, 1);
+		return;
+	}
+
+	printf("\t\t\t\tSet password: ");
+	fgets(password, sizeof(password), stdin);
+	password[strcspn(password, "\n")] = '\0';
+
+	time_t now = time(NULL);
+	struct tm *t = localtime(&now);
+	strftime(newUser.creationDate, sizeof(newUser.creationDate), "%Y-%m-%d %H:%M:%S", t);
+
+	strcpy(newUser.name, username);
+	strcpy(newUser.password, password);
+	newUser.balance = initialBalance;
+
+	char filename[120];
+	snprintf(filename, sizeof(filename), "%s.dat", username);
+	FILE *file = fopen(filename, "wb");
+	if (file) {
+		fwrite(&newUser, sizeof(User), 1, file);
+		fclose(file);
+		printf("\t\t\t\tAccount created successfully.\n");
+	} else {
+		printf("\t\t\t\tFailed to create account.\n");
+	}
+	//getchar();
+	showLoading(3, 1);
+}
+
+float getBalance(const char *username) {
+	char filename[120];
+	snprintf(filename, sizeof(filename), "%s.dat", username);
+	FILE *file = fopen(filename, "rb");
+	User user;
+	float balance = 0.0;
+
+	if (file) {
+		fread(&user, sizeof(User), 1, file);
+		fclose(file);
+		balance = user.balance;
+	}
+	return balance;
+}
+
+void deposit(const char *username) {
+	float amount;
+	char filename[120];
+	snprintf(filename, sizeof(filename), "%s.dat", username);
+	FILE *file = fopen(filename, "rb+");
+	User user;
+
+	if (!file) {
+		printf("\t\t\t\tFailed to open account.\n");
+		showLoading(3, 1);
+		return;
+	}
+
+	fread(&user, sizeof(User), 1, file);
+
+	printf("\t\t\t\tCurrent Balance: %.2f\n", user.balance);
+	printf("\t\t\t\tEnter deposit amount: ");
+	scanf("%f", &amount);
+	getchar();
+
+	if (amount <= 0) {
+		printf("\t\t\t\tInvalid amount.\n");
+		fclose(file);
+		return;
+	}
+
+	user.balance += amount;
+	rewind(file);
+	fwrite(&user, sizeof(User), 1, file);
+	fclose(file);
+
+	printf("\t\t\t\tDeposit successful. New Balance: %.2f\n", user.balance);
+	logTransaction(username, "Deposit", amount);
+}
