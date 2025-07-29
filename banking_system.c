@@ -268,3 +268,96 @@ void deposit(const char *username)
 	printf("\t\t\t\tDeposit successful. New Balance: %.2f\n", user.balance);
 	logTransaction(username, "Deposit", amount);
 }
+//from here
+void withdraw(const char *username) {
+	float amount;
+	char filename[120];
+	snprintf(filename, sizeof(filename), "%s.dat", username);
+	FILE *file = fopen(filename, "rb+");
+	User user;
+
+	if (!file) {
+		printf("\t\t\t\tFailed to open account.\n");
+		showLoading(3, 1);
+		return;
+	}
+
+	fread(&user, sizeof(User), 1, file);
+
+	printf("\t\t\t\tCurrent Balance: %.2f\n", user.balance);
+	printf("\t\t\t\tEnter withdrawal amount: ");
+	scanf("%f", &amount);
+	getchar();
+
+	if (amount <= 0 || amount > user.balance) {
+		printf("\t\t\t\tInvalid or insufficient balance.\n");
+		fclose(file);
+		return;
+	}
+
+	user.balance -= amount;
+	rewind(file);
+	fwrite(&user, sizeof(User), 1, file);
+	fclose(file);
+
+	printf("\t\t\t\tWithdrawal successful. New Balance: %.2f\n", user.balance);
+	logTransaction(username, "Withdraw", amount);
+}
+
+void displayDetails(const char *username) {
+	char filename[120];
+	snprintf(filename, sizeof(filename), "%s.dat", username);
+	FILE *file = fopen(filename, "rb");
+	User user;
+
+	if (!file) {
+		printf("\t\t\t\tFailed to open account.\n");
+		return;
+	}
+
+	fread(&user, sizeof(User), 1, file);
+	fclose(file);
+
+	printf("\t\t\t\tAccount: %s\n", user.name);
+	printf("\t\t\t\tBalance: %.2f\n", user.balance);
+	printf("\t\t\t\tCreated On: %s\n", user.creationDate);
+
+	// Display log file
+	char logFilename[120];
+	snprintf(logFilename, sizeof(logFilename), "%s_log.txt", username);
+	FILE *logFile = fopen(logFilename, "r");
+	if (logFile) {
+		char line[256];
+		printf("\t\t\t\tTransaction History:\n");
+		while (fgets(line, sizeof(line), logFile)) {
+			printf("\t\t\t\t%s", line);
+		}
+		fclose(logFile);
+	} else {
+		printf("\t\t\t\tNo transaction history.\n");
+	}
+}
+
+void logTransaction(const char *username, const char *type, float amount) {
+	char filename[120];
+	snprintf(filename, sizeof(filename), "%s_log.txt", username);
+	FILE *logFile = fopen(filename, "a");
+
+	if (!logFile) return;
+
+	time_t now = time(NULL);
+	struct tm *t = localtime(&now);
+	char timestamp[100];
+	strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", t);
+
+	fprintf(logFile, "%s | %s | %.2f\n", timestamp, type, amount);
+	fclose(logFile);
+}
+
+void clearScreen() {
+#ifdef _WIN32
+	system("cls");
+#else
+	system("clear");
+#endif
+}
