@@ -154,7 +154,10 @@ int authenticateUser(const char *username)
 	char filename[120], enteredPassword[100];
 	snprintf(filename, sizeof(filename), "%s.dat", username);
 	FILE *file = fopen(filename, "rb");
-	if (!file) return 0;
+	if (!file)
+	{
+		return 0;
+	}
 
 	User user;
 	fread(&user, sizeof(User), 1, file);
@@ -268,15 +271,17 @@ void deposit(const char *username)
 	printf("\t\t\t\tDeposit successful. New Balance: %.2f\n", user.balance);
 	logTransaction(username, "Deposit", amount);
 }
-//from here
-void withdraw(const char *username) {
+
+void withdraw(const char *username)
+{
 	float amount;
 	char filename[120];
 	snprintf(filename, sizeof(filename), "%s.dat", username);
 	FILE *file = fopen(filename, "rb+");
 	User user;
 
-	if (!file) {
+	if (!file)
+	{
 		printf("\t\t\t\tFailed to open account.\n");
 		showLoading(3, 1);
 		return;
@@ -289,7 +294,8 @@ void withdraw(const char *username) {
 	scanf("%f", &amount);
 	getchar();
 
-	if (amount <= 0 || amount > user.balance) {
+	if (amount <= 0 || amount > user.balance)
+	{
 		printf("\t\t\t\tInvalid or insufficient balance.\n");
 		fclose(file);
 		return;
@@ -304,13 +310,15 @@ void withdraw(const char *username) {
 	logTransaction(username, "Withdraw", amount);
 }
 
-void displayDetails(const char *username) {
+void displayDetails(const char *username)
+{
 	char filename[120];
 	snprintf(filename, sizeof(filename), "%s.dat", username);
 	FILE *file = fopen(filename, "rb");
 	User user;
 
-	if (!file) {
+	if (!file)
+	{
 		printf("\t\t\t\tFailed to open account.\n");
 		return;
 	}
@@ -322,28 +330,35 @@ void displayDetails(const char *username) {
 	printf("\t\t\t\tBalance: %.2f\n", user.balance);
 	printf("\t\t\t\tCreated On: %s\n", user.creationDate);
 
-	// Display log file
 	char logFilename[120];
 	snprintf(logFilename, sizeof(logFilename), "%s_log.txt", username);
 	FILE *logFile = fopen(logFilename, "r");
-	if (logFile) {
+	if (logFile)
+	{
 		char line[256];
 		printf("\t\t\t\tTransaction History:\n");
-		while (fgets(line, sizeof(line), logFile)) {
+		while (fgets(line, sizeof(line), logFile))
+		{
 			printf("\t\t\t\t%s", line);
 		}
 		fclose(logFile);
-	} else {
+	}
+	else
+	{
 		printf("\t\t\t\tNo transaction history.\n");
 	}
 }
 
-void logTransaction(const char *username, const char *type, float amount) {
+void logTransaction(const char *username, const char *type, float amount)
+{
 	char filename[120];
 	snprintf(filename, sizeof(filename), "%s_log.txt", username);
 	FILE *logFile = fopen(filename, "a");
 
-	if (!logFile) return;
+	if (!logFile)
+	{
+		return;
+	}
 
 	time_t now = time(NULL);
 	struct tm *t = localtime(&now);
@@ -354,7 +369,8 @@ void logTransaction(const char *username, const char *type, float amount) {
 	fclose(logFile);
 }
 
-void clearScreen() {
+void clearScreen()
+{
 #ifdef _WIN32
 	system("cls");
 #else
